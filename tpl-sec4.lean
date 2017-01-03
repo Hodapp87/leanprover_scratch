@@ -6,10 +6,10 @@ section examples1
   variables (α : Type) (p q : α → Prop)
 
   -- ∀ has very wide scope, hence parenthesis:
-  example : (∀ x : α, p x ∧ q x) → ∀ y : α, p y  :=
-    assume h : ∀ x : α, p x ∧ q x,
-    take y : α,
-    show p y, from (h y)^.left
+  --example : (∀ x : α, p x ∧ q x) → ∀ y : α, p y  :=
+  --  assume h : ∀ x : α, p x ∧ q x,
+  --  take y : α,
+  --  show p y, from (h y)^.left
 
   -- Equivalent (it's just renaming of bound variables):
   example : (∀ x : α, p x ∧ q x) → ∀ y : α, p y  :=
@@ -83,7 +83,6 @@ section exercises1
       (assume h2 : ∀ (x : α), q x, or.inr (h2 x))
 
   -- Reverse implication:
-  open classical
   example : (∀ x, p x ∨ q x) → (∀ x, p x) ∨ (∀ x, q x) :=
     assume h : ∀ x, p x ∨ q x,
     show (∀ (x : α), p x) ∨ (∀ (x : α), q x), from sorry
@@ -115,7 +114,6 @@ section exercises1
 end exercises1
 
 section exercises2
-  open classical
   variables (α : Type) (p q : α → Prop)
   variable r : Prop
 
@@ -127,7 +125,7 @@ section exercises2
   -- Requires classical reasoning in one direction:
   example : (∀ x, p x ∨ r) ↔ (∀ x, p x) ∨ r :=
     iff.intro
-      (assume h : ∀ x, p x ∨ r, by_cases -- uses EM here
+      (assume h : ∀ x, p x ∨ r, classical.by_cases
           or.inr
           (assume hnr : ¬r,
             or.inl (take x : α, or.resolve_right (h x) hnr)))
@@ -161,5 +159,24 @@ section barber_paradox
     have hs : ¬shaves barber barber, from thm1 (iff.mp h2),
     have hns : shaves barber barber, from (iff.mpr h2) hs,
     hs hns
-
 end barber_paradox
+
+section exercises3
+  variables (α : Type) (p q : α → Prop)
+  variable a : α
+  variable r : Prop
+
+  example : (∃ x : α, r) → r := sorry
+  example : r → (∃ x : α, r) := sorry
+  example : (∃ x, p x ∧ r) ↔ (∃ x, p x) ∧ r := sorry
+  example : (∃ x, p x ∨ q x) ↔ (∃ x, p x) ∨ (∃ x, q x) := sorry
+
+  example : (∀ x, p x) ↔ ¬ (∃ x, ¬ p x) := sorry
+  example : (∃ x, p x) ↔ ¬ (∀ x, ¬ p x) := sorry
+  example : (¬ ∃ x, p x) ↔ (∀ x, ¬ p x) := sorry
+  example : (¬ ∀ x, p x) ↔ (∃ x, ¬ p x) := sorry
+
+  example : (∀ x, p x → r) ↔ (∃ x, p x) → r := sorry
+  example : (∃ x, p x → r) ↔ (∀ x, p x) → r := sorry
+  example : (∃ x, r → p x) ↔ (r → ∃ x, p x) := sorry
+end exercises3
