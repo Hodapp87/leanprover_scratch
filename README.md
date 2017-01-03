@@ -4,7 +4,7 @@ leanprover_scratch
 After listening to the
 excellent
 [Functional Geekery #77](https://www.functionalgeekery.com/episode-77-jared-roesch/) with
-Jared Roesch, I took a look at [Lean][https://leanprover.github.io/].
+Jared Roesch, I took a look at [Lean](https://leanprover.github.io/).
 This repository contains some of my scratch work in Lean as I read
 tutorials and courses and work through the examples.
 
