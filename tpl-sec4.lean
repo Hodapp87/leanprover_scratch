@@ -144,3 +144,22 @@ section exercises2
       (assume h : r → ∀ x, p x, take x : α,    assume hr : r, h hr x)
 
 end exercises2
+
+section barber_paradox
+  variables (men : Type) (barber : men) (shaves : men → men → Prop)
+
+  -- Lifted this from the prior file:
+  variable {p : Prop}
+  theorem thm1 : (p → ¬p) → ¬p :=
+    assume h : p → ¬p,
+    assume h2 : p,
+    (h h2) h2
+ 
+  -- Parentheses added to clarify for me
+  example (h : (∀ x : men, shaves barber x ↔ ¬ shaves x x)) : false :=
+    have h2 : shaves barber barber ↔ ¬shaves barber barber, from h barber,
+    have hs : ¬shaves barber barber, from thm1 (iff.mp h2),
+    have hns : shaves barber barber, from (iff.mpr h2) hs,
+    hs hns
+
+end barber_paradox
