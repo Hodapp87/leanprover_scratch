@@ -93,6 +93,13 @@ section exercises1
     -- However, to construct (∀x, p x) ∨ (∀x, q x), we must choose a
     -- side, but can't guarantee that the 'x' of one side is the same
     -- as the other.
+    -- 
+    -- For an example, suppose that x is a natural number, p checks
+    -- for even numbers, and q checks for odd numbers.  (∀x, p x ∨ q
+    -- x) is clearly true - every single x must be either even or odd.
+    -- However, (∀x, p x) and (∀x, q x) are both false - not all
+    -- numbers are even, and not all numbers are odd. Since neither
+    -- one is true, (∀x, p x) ∨ (∀x, q x) must be false also.
 
   -- If we had (∀x, p x ∧ q x) (note ∧ rather than ∨), then we
   -- should be able to derive (∀ x, p x) ∨ (∀ x, q x) because we now
@@ -120,8 +127,10 @@ section exercises2
   -- Requires classical reasoning in one direction:
   example : (∀ x, p x ∨ r) ↔ (∀ x, p x) ∨ r :=
     iff.intro
-      (assume h : ∀ x, p x ∨ r,
-        _)
+      (assume h : ∀ x, p x ∨ r, by_cases -- uses EM here
+          or.inr
+          (assume hnr : ¬r,
+            or.inl (take x : α, or.resolve_right (h x) hnr)))
       (assume h : (∀ x, p x) ∨ r,
         or.elim h
           (assume h2 : ∀ x, p x,
@@ -129,5 +138,9 @@ section exercises2
           (assume h2 : r,
             take x, or.inr h2))
   
-  example : (∀ x, r → p x) ↔ (r → ∀ x, p x) := sorry  
+  example : (∀ x, r → p x) ↔ (r → ∀ x, p x) :=
+    iff.intro
+      (assume h : ∀ x, r → p x, assume hr : r, take x : α,    h x  hr)
+      (assume h : r → ∀ x, p x, take x : α,    assume hr : r, h hr x)
+
 end exercises2
