@@ -2,6 +2,7 @@
 -- https://leanprover.github.io/theorem_proving_in_lean/index.html
 -- Section 4 (Quantifiers and Equality)
 
+-- Section 4.1, The Universal Qualifier
 section examples1
   variables (α : Type) (p q : α → Prop)
 
@@ -54,7 +55,7 @@ section examples3
     trans_r (trans_r hab (symm_r hcb)) hcd  
 end examples3
 
-section exercises1
+section exercises41a
   variables (α : Type) (p q : α → Prop)
 
   example : (∀ x, p x ∧ q x) ↔ (∀ x, p x) ∧ (∀ x, q x) :=
@@ -111,9 +112,9 @@ section exercises1
     assume h : ∀ x, p x ∧ q x,
     or.inr (take x : α, and.right (h x))
 
-end exercises1
+end exercises41a
 
-section exercises2
+section exercises41b
   variables (α : Type) (p q : α → Prop)
   variable r : Prop
 
@@ -141,7 +142,7 @@ section exercises2
       (assume h : ∀ x, r → p x, assume hr : r, take x : α,    h x  hr)
       (assume h : r → ∀ x, p x, take x : α,    assume hr : r, h hr x)
 
-end exercises2
+end exercises41b
 
 section barber_paradox
   variables (men : Type) (barber : men) (shaves : men → men → Prop)
@@ -161,22 +162,123 @@ section barber_paradox
     hs hns
 end barber_paradox
 
-section exercises3
+-- Section 4.2, Equality
+
+-- Section 4.3, Calculational Proofs
+-- (should probably review this later)
+
+-- Section 4.4, The Existential Qualifier
+section exercises44a
   variables (α : Type) (p q : α → Prop)
+  -- "Notice that the declaration variable a : α amounts to the
+  -- assumption that there is at least one element of type α. This
+  -- assumption is needed in the second example, as well as in the
+  -- last two." (This sounds kinda... nonconstructive.)
   variable a : α
   variable r : Prop
 
-  example : (∃ x : α, r) → r := sorry
-  example : r → (∃ x : α, r) := sorry
-  example : (∃ x, p x ∧ r) ↔ (∃ x, p x) ∧ r := sorry
-  example : (∃ x, p x ∨ q x) ↔ (∃ x, p x) ∨ (∃ x, q x) := sorry
+  example : (∃ x : α, r) → r :=
+    (assume h : (∃ x : α, r),
+      exists.elim h
+        (assume α, assume r, r))
 
-  example : (∀ x, p x) ↔ ¬ (∃ x, ¬ p x) := sorry
-  example : (∃ x, p x) ↔ ¬ (∀ x, ¬ p x) := sorry
-  example : (¬ ∃ x, p x) ↔ (∀ x, ¬ p x) := sorry
-  example : (¬ ∀ x, p x) ↔ (∃ x, ¬ p x) := sorry
+  -- Or:
+  example : (∃ x : α, r) → r :=
+    (assume h : (∃ x : α, r),
+      match h with ⟨w, hw⟩ := 
+        hw
+      end)
 
-  example : (∀ x, p x → r) ↔ (∃ x, p x) → r := sorry
-  example : (∃ x, p x → r) ↔ (∀ x, p x) → r := sorry
-  example : (∃ x, r → p x) ↔ (r → ∃ x, p x) := sorry
-end exercises3
+  -- Or (by implicit match):
+  example : (∃ x : α, r) → r := assume ⟨x, hr⟩, hr
+
+  example : r → (∃ x : α, r) :=
+    assume hr : r,
+    exists.intro a hr
+
+  -- Or:
+  example : r → (∃ x : α, r) := assume hr : r, ⟨a, hr⟩
+
+  example : (∃ x, p x ∧ r) ↔ (∃ x, p x) ∧ r :=
+    iff.intro
+      (assume h : ∃ x, p x ∧ r, exists.elim h
+        (take a : α, assume hpr : p a ∧ r,
+          and.intro ⟨a, and.left hpr⟩ (and.right hpr)))
+      (assume h : (∃ x, p x) ∧ r, and.elim h
+        (assume hp : ∃ x, p x, assume hr : r,
+          match hp with ⟨x, hp2⟩ :=
+            ⟨x, and.intro hp2 hr⟩
+          end))
+
+  -- Or (match on ((∃ x, p x) ∧ r) is outer-first):
+  example : (∃ x, p x ∧ r) ↔ (∃ x, p x) ∧ r := iff.intro
+      (assume ⟨(x : α), (hp : p x), (hr : r)⟩, and.intro ⟨x, hp⟩ hr)
+      (assume ⟨⟨x, hp⟩, hr⟩, ⟨x, and.intro hp hr⟩)
+
+  example : (∃ x, p x ∨ q x) ↔ (∃ x, p x) ∨ (∃ x, q x) := iff.intro
+    (assume ⟨x, (h : p x ∨ q x)⟩, or.elim h
+      (assume hp : p x, or.inl ⟨x, hp⟩)
+      (assume hq : q x, or.inr ⟨x, hq⟩))
+    (assume h : (∃ x, p x) ∨ (∃ x, q x), or.elim h
+      (assume ⟨x, hp⟩, ⟨x, or.inl hp⟩)
+      (assume ⟨x, hq⟩, ⟨x, or.inr hq⟩))
+
+  -- I guess this relies on classical reasoning.  ¬(∃x, ¬p x) only
+  -- says that no x exists for which ¬p x - which doesn't
+  -- (constructively) say that any x exists for which p x, much less
+  -- that all x have that property.
+  example : (∀ x, p x) ↔ ¬ (∃ x, ¬ p x) :=
+    iff.intro
+      (assume h : ∀ (x : α), p x,
+        assume ⟨(x : α), (np : ¬p x)⟩, np (h x))
+      (assume h : ¬∃ (x : α), ¬p x,
+        take x, classical.by_contradiction
+          -- Assume that some x *does* exist for which ¬p x, and we
+          -- contradict ¬(∃x, ¬p x):
+          (assume np : ¬p x, h ⟨x, np⟩))
+
+  example : (∃ x, p x) ↔ ¬ (∀ x, ¬ p x) :=
+    iff.intro
+      (assume ⟨(x : α), (px : p x)⟩,
+        -- Witness 'x' disproves ∀x, ¬p x:
+        assume h : ∀ (x : α), ¬p x, (h x) px)
+      (assume hn : ¬∀ (x : α), ¬p x,
+        -- (¬∀x, ¬p x) = (∀x, ¬p x) → false, that is, we can't show
+        -- that every 'x' produces ¬p x... but if I'm understanding
+        -- this right, this can't tell us which 'x' has that property,
+        -- thus it can't be shown constructively.
+        sorry
+        -- but I can't figure out how to show it with classical
+        -- reasoning either!
+        )
+
+  example : (¬ ∃ x, p x) ↔ (∀ x, ¬ p x) :=
+    iff.intro
+      (assume hn : ¬ ∃ x, p x,
+        take x, assume h : p x, hn ⟨x, h⟩)
+      (assume h : ∀ x, ¬ p x,
+        -- If ¬p x for all x, then any x for which p x must be a
+        -- contradiction:
+        assume ⟨(x : α), (hp : p x)⟩, (h x) hp)
+
+  example : (¬ ∀ x, p x) ↔ (∃ x, ¬ p x) :=
+    iff.intro
+      (assume h : ¬ ∀ x, p x, sorry)
+      (assume h : ∃ x, ¬ p x, sorry)
+
+  example : (∀ x, p x → r) ↔ (∃ x, p x) → r :=
+    iff.intro
+      (assume h : ∀ x, p x → r, sorry)
+      (assume h : (∃ x, p x) → r, sorry)
+
+  example : (∃ x, p x → r) ↔ (∀ x, p x) → r :=
+    iff.intro
+      (assume h : ∃ x, p x → r, sorry)
+      (assume h : (∀ x, p x) → r, sorry)
+
+  example : (∃ x, r → p x) ↔ (r → ∃ x, p x) :=
+    iff.intro
+      (assume h : (∃ x, r → p x), sorry)
+      (assume h : (r → ∃ x, p x), sorry)
+
+end exercises44a
