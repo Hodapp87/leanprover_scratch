@@ -263,22 +263,32 @@ section exercises44a
 
   example : (¬ ∀ x, p x) ↔ (∃ x, ¬ p x) :=
     iff.intro
-      (assume h : ¬ ∀ x, p x, sorry)
-      (assume h : ∃ x, ¬ p x, sorry)
+      (assume h : ¬ ∀ x, p x, _)
+      (assume ⟨x, (nhp : ¬ p x)⟩,
+        assume hp : ∀ x, p x, nhp (hp x))
 
   example : (∀ x, p x → r) ↔ (∃ x, p x) → r :=
     iff.intro
-      (assume h : ∀ x, p x → r, sorry)
-      (assume h : (∃ x, p x) → r, sorry)
+      (assume h : ∀ x, p x → r,
+        assume ⟨(x : α), (hp : p x)⟩, (h x) hp)
+      (assume h : (∃ x, p x) → r, take x,
+        assume hp : p x, h ⟨x, hp⟩)
 
   example : (∃ x, p x → r) ↔ (∀ x, p x) → r :=
     iff.intro
-      (assume h : ∃ x, p x → r, sorry)
+      (assume ⟨x, (hp : p x → r)⟩,
+        assume h : (∀ (x : α), p x), hp (h x))
       (assume h : (∀ x, p x) → r, sorry)
 
   example : (∃ x, r → p x) ↔ (r → ∃ x, p x) :=
     iff.intro
-      (assume h : (∃ x, r → p x), sorry)
-      (assume h : (r → ∃ x, p x), sorry)
+      (assume ⟨x, (f : r → p x)⟩, assume hr : r, ⟨x, f hr⟩)
+      (assume h : (r → ∃ x, p x),
+        or.elim (classical.em r)
+          (assume hr : r,
+            match h hr with ⟨x, px⟩ :=
+              ⟨x, assume r, px⟩
+            end)
+          (assume hr : ¬r, sorry))
 
 end exercises44a
