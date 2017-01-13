@@ -1,4 +1,3 @@
-
 -- https://leanprover.github.io/theorem_proving_in_lean/index.html
 -- Section 4 (Quantifiers and Equality)
 
@@ -237,6 +236,8 @@ section exercises44a
           -- contradict ¬(∃x, ¬p x):
           (assume np : ¬p x, h ⟨x, np⟩))
 
+-- Various exercises below are still incomplete:
+
   example : (∃ x, p x) ↔ ¬ (∀ x, ¬ p x) :=
     iff.intro
       (assume ⟨(x : α), (px : p x)⟩,
@@ -263,7 +264,7 @@ section exercises44a
 
   example : (¬ ∀ x, p x) ↔ (∃ x, ¬ p x) :=
     iff.intro
-      (assume h : ¬ ∀ x, p x, _)
+      (assume h : ¬ ∀ x, p x, sorry)
       (assume ⟨x, (nhp : ¬ p x)⟩,
         assume hp : ∀ x, p x, nhp (hp x))
 
