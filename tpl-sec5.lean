@@ -522,6 +522,34 @@ section simplify1
   begin simp at h, assumption end
 end simplify1
 
--- Exercises I should probably do myself: Redo some of the section 4
--- exercises in tactic style rather than term style.
+-- Below, I redo some of the section 4 exercises in tactic style
+-- rather than term style:
+section exercises44a
+  variables (α : Type) (p q : α → Prop)
+  -- "Notice that the declaration variable a : α amounts to the
+  -- assumption that there is at least one element of type α. This
+  -- assumption is needed in the second example, as well as in the
+  -- last two." (This sounds kinda... nonconstructive.)
+  variable a : α
+  variable r : Prop
 
+  example : (∃ x, p x ∨ q x) ↔ (∃ x, p x) ∨ (∃ x, q x) :=
+  begin
+    apply iff.intro,
+    -- How do I start a begin/end block in Emacs, leave it empty, and
+    -- still have C-c C-g tell me the current goal?  All I want to do
+    -- is work incrementally.
+    { intro h,
+      cases h with x hpq,
+      cases hpq with hp hq,
+        left, existsi x, exact hp,
+      right, existsi x, exact hq },
+    intro h,
+    cases h with hp hq,
+      cases hp with x hpx,
+      existsi x, left, exact hpx,
+    cases hq with x hpq,
+      existsi x, right, exact hpq,
+  end
+
+end exercises44a
